@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EmotionAI — NLP Emotion Classifier</title>
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Background layers -->
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow--one"></div>
+<div class="bg-glow bg-glow--two"></div>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="navbar__inner">
+    <div class="brand">
+      <span class="brand__mark"><i class="fa-solid fa-brain"></i></span>
+      <div class="brand__text">
+        <span class="brand__name">EmotionAI</span>
+        <span class="brand__sub">NLP Emotion Classifier</span>
+      </div>
+    </div>
+    <div class="navbar__status">
+      <span class="status-dot" id="apiStatusDot"></span>
+      <span id="apiStatusText">checking API…</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero__eyebrow"><i class="fa-solid fa-wave-square"></i> Text classification · scikit-learn · TF-IDF</p>
+    <h1 class="hero__title">Understand the emotion<br>behind your words</h1>
+    <p class="hero__subtitle">AI-powered text emotion classification using NLP and Machine Learning.</p>
+  </section>
+
+  <!-- PREDICTION CARD -->
+  <section class="predict" id="predict">
+    <div class="card predict__card">
+
+      <label class="predict__label" for="textInput">Enter a sentence to analyze</label>
+
+      <div class="textarea-wrap">
+        <textarea
+          id="textInput"
+          maxlength="500"
+          rows="4"
+          placeholder="Type something like: I am extremely happy today..."
+        ></textarea>
+        <span class="char-counter"><span id="charCount">0</span>/500</span>
+      </div>
+
+      <div class="predict__footer">
+        <span class="predict__hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> to analyze</span>
+        <button class="btn-analyze" id="analyzeBtn">
+          <span class="btn-analyze__content">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Analyze Emotion</span>
+          </span>
+          <span class="btn-analyze__loader">
+            <span class="spinner"></span>
+            <span>Analyzing…</span>
+          </span>
+        </button>
+      </div>
+
+      <p class="error-msg" id="errorMsg"></p>
+    </div>
+
+    <!-- RESULT CARD -->
+    <div class="card result-card" id="resultCard" data-emotion="">
+      <div class="result-card__glow"></div>
+      <span class="result-card__eyebrow">Detected emotion</span>
+      <div class="result-card__icon" id="resultIcon"><i class="fa-solid fa-face-smile"></i></div>
+      <h2 class="result-card__emotion" id="resultEmotion">Joy</h2>
+      <p class="result-card__message" id="resultMessage">You seem to be feeling joyful!</p>
+      <p class="result-card__source">Source text: <span id="resultSourceText"></span></p>
+    </div>
+  </section>
+
+  <!-- EXAMPLES -->
+  <section class="examples">
+    <h3 class="section-heading">Try an example</h3>
+    <div class="examples__grid" id="examplesGrid">
+      <!-- populated by JS, but here as static fallback / semantic content -->
+      <button class="example-chip" data-text="I am so happy today!">
+        <i class="fa-solid fa-face-grin-beam"></i>
+        <span>"I am so happy today!"</span>
+      </button>
+      <button class="example-chip" data-text="I feel really sad and lonely.">
+        <i class="fa-solid fa-face-sad-tear"></i>
+        <span>"I feel really sad and lonely."</span>
+      </button>
+      <button class="example-chip" data-text="I am extremely angry right now.">
+        <i class="fa-solid fa-face-angry"></i>
+        <span>"I am extremely angry right now."</span>
+      </button>
+      <button class="example-chip" data-text="I love spending time with my family.">
+        <i class="fa-solid fa-heart"></i>
+        <span>"I love spending time with my family."</span>
+      </button>
+      <button class="example-chip" data-text="Wow! I can't believe this happened!">
+        <i class="fa-solid fa-face-surprise"></i>
+        <span>"Wow! I can't believe this happened!"</span>
+      </button>
+      <button class="example-chip" data-text="I am scared about what might happen.">
+        <i class="fa-solid fa-face-flushed"></i>
+        <span>"I am scared about what might happen."</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ABOUT MODEL -->
+  <section class="about">
+    <h3 class="section-heading">How it works</h3>
+    <div class="about__grid">
+      <div class="about-card">
+        <i class="fa-solid fa-comments about-card__icon"></i>
+        <h4>NLP</h4>
+        <p>Raw text is cleaned and processed using natural language processing techniques.</p>
+      </div>
+      <div class="about-card">
+        <i class="fa-solid fa-chart-simple about-card__icon"></i>
+        <h4>TF-IDF</h4>
+        <p>Text is converted into numerical features using TF-IDF vectorization.</p>
+      </div>
+      <div class="about-card">
+        <i class="fa-solid fa-diagram-project about-card__icon"></i>
+        <h4>Machine Learning</h4>
+        <p>A trained scikit-learn model maps those features to an emotion class.</p>
+      </div>
+      <div class="about-card">
+        <i class="fa-solid fa-server about-card__icon"></i>
+        <h4>FastAPI</h4>
+        <p>Predictions are served through a lightweight FastAPI backend over REST.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>Built with Python • NLP • Machine Learning • FastAPI</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
