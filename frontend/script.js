@@ -7,7 +7,7 @@
 
 // 1. BACKEND URL -----------------------------------------------------------
 // Local FastAPI (uvicorn) during development:
-const API_URL = "https://nlp-emotion-classifer-1.onrender.com/predict";
+const API_URL = "https://nlp-emotion-classifier.onrender.com/predict";
 
 // When you deploy the backend (e.g. on Render), replace the line above with
 // your live URL, for example:
@@ -127,29 +127,40 @@ async function handleAnalyzeClick() {
 
 
 // 8. CALL THE FASTAPI BACKEND ----------------------------------------------------
-async function predictEmotion(userText) {
-  const response = await fetch(`${API_URL}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      text: userText,
-    }),
-  });
 
-  if (!response.ok) {
-    throw new Error(`API returned status ${response.status}`);
-  }
+ async function predictEmotion(userText) {
+    const response = await fetch(`${API_URL}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            text: userText,
+        }),
+    });
 
-  const data = await response.json();
+    const responseText = await response.text();
 
-  if (!data || !data.emotion) {
-    throw new Error("API response did not contain an 'emotion' field.");
-  }
+    console.log("API status:", response.status);
+    console.log("API response:", responseText);
 
-  // The emotion always comes straight from the backend response.
-  return data.emotion;
+    if (!response.ok) {
+        throw new Error(
+            `API returned status ${response.status}: ${responseText}`
+        );
+    }
+
+    if (!responseText) {
+        throw new Error("API returned an empty response.");
+    }
+
+    const data = JSON.parse(responseText);
+
+    if (!data || !data.emotion) {
+        throw new Error("API response did not contain an 'emotion' field.");
+    }
+
+    return data.emotion;
 }
 
 
