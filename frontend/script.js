@@ -7,7 +7,7 @@
 
 // 1. BACKEND URL -----------------------------------------------------------
 // Local FastAPI (uvicorn) during development:
-const API_URL = "http://127.0.0.1:8000/predict";
+const API_URL = "https://nlp-emotion-classifer-1.onrender.com/predict";
 
 // When you deploy the backend (e.g. on Render), replace the line above with
 // your live URL, for example:
