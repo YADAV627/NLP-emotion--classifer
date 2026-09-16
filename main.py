@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import re
@@ -14,51 +14,28 @@ app = FastAPI(
 )
 
 
-# --------------------------------------------------
 # CORS
-# --------------------------------------------------
-
-@app.middleware("http")
-async def add_cors_headers(request, call_next):
-
-    if request.method == "OPTIONS":
-        return JSONResponse(
-            content={"message": "CORS preflight OK"},
-            headers={
-                "Access-Control-Allow-Origin": "https://nlp-emotion-classifer-1.onrender.com",
-                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-                "Access-Control-Allow-Headers": "*",
-            }
-        )
-
-    response = await call_next(request)
-
-    response.headers["Access-Control-Allow-Origin"] = (
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
         "https://nlp-emotion-classifer-1.onrender.com"
-    )
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "*"
+    ],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    return response
 
-
-# --------------------------------------------------
-# Load Model
-# --------------------------------------------------
-
+# Base directory
 BASE_DIR = Path(__file__).resolve().parent
 
+
+# Load model and TF-IDF
 model = joblib.load(BASE_DIR / "model.pkl")
 tfidf = joblib.load(BASE_DIR / "tfidf.pkl")
 
-print("MODEL CLASSES =", model.classes_)
-print("MODEL TYPE =", type(model))
 
-
-# --------------------------------------------------
-# Emotion Mapping
-# --------------------------------------------------
-
+# Emotion mapping
 emotion_mapping = {
     0: "sadness",
     1: "anger",
@@ -69,49 +46,32 @@ emotion_mapping = {
 }
 
 
-# --------------------------------------------------
-# Request Schema
-# --------------------------------------------------
-
+# Request body
 class TextInput(BaseModel):
     text: str
 
 
-# --------------------------------------------------
-# Text Preprocessing
-# --------------------------------------------------
-
+# Text preprocessing
 def preprocess_text(text):
-
     text = text.lower()
-
     text = text.translate(
         str.maketrans("", "", string.punctuation)
     )
-
     text = re.sub(r"\d+", "", text)
-
     text = " ".join(text.split())
 
     return text
 
 
-# --------------------------------------------------
-# Home Route
-# --------------------------------------------------
-
+# Home route
 @app.get("/")
 def home():
-
     return {
         "message": "Emotion Classifier API is running"
     }
 
 
-# --------------------------------------------------
-# Prediction Route
-# --------------------------------------------------
-
+# Prediction route
 @app.post("/predict")
 def predict_emotion(data: TextInput):
 
@@ -128,19 +88,12 @@ def predict_emotion(data: TextInput):
 
     prediction = model.predict(text_vector)[0]
 
-    print("RAW PREDICTION =", prediction)
-
     emotion = emotion_mapping.get(
         int(prediction),
         "unknown"
     )
 
-    print("MAPPED EMOTION =", emotion)
-
     return {
         "text": text,
         "emotion": emotion
     }
-
-
-print("NEW MAIN.PY LOADED")
