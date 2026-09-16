@@ -1,27 +1,45 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import joblib
 import re
 import string
 from pathlib import Path
 
+
 app = FastAPI(
     title="Emotion Classifier API",
     description="API for predicting emotions from text",
     version="1.0.0"
 )
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://nlp-emotion-classifer-1.onrender.com"
-    ],
-    allow_credentials=False,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["*"],
-)
-    
 
+
+# --------------------------------------------------
+# CORS
+# --------------------------------------------------
+
+@app.middleware("http")
+async def add_cors_headers(request, call_next):
+
+    if request.method == "OPTIONS":
+        return JSONResponse(
+            content={"message": "CORS preflight OK"},
+            headers={
+                "Access-Control-Allow-Origin": "https://nlp-emotion-classifer-1.onrender.com",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                "Access-Control-Allow-Headers": "*",
+            }
+        )
+
+    response = await call_next(request)
+
+    response.headers["Access-Control-Allow-Origin"] = (
+        "https://nlp-emotion-classifer-1.onrender.com"
+    )
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+
+    return response
 
 
 # --------------------------------------------------
@@ -30,10 +48,13 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parent
 
-model = joblib.load(BASE_DIR /"model.pkl")
+model = joblib.load(BASE_DIR / "model.pkl")
 tfidf = joblib.load(BASE_DIR / "tfidf.pkl")
+
 print("MODEL CLASSES =", model.classes_)
 print("MODEL TYPE =", type(model))
+
+
 # --------------------------------------------------
 # Emotion Mapping
 # --------------------------------------------------
@@ -62,18 +83,14 @@ class TextInput(BaseModel):
 
 def preprocess_text(text):
 
-    # lowercase
     text = text.lower()
 
-    # remove punctuation
     text = text.translate(
         str.maketrans("", "", string.punctuation)
     )
 
-    # remove numbers
     text = re.sub(r"\d+", "", text)
 
-    # remove extra spaces
     text = " ".join(text.split())
 
     return text
@@ -124,4 +141,6 @@ def predict_emotion(data: TextInput):
         "text": text,
         "emotion": emotion
     }
-print(" NEW MAIN.PY LOADED ")
+
+
+print("NEW MAIN.PY LOADED")
